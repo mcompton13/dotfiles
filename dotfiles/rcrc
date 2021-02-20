@@ -1,0 +1,76 @@
+#!/usr/bin/env sh
+
+# This function is copied from
+# https://github.com/ko1nksm/readlinkf/blob/a1112ce3ff6be50da8f45abe6667e0e4be7d9bb8/readlinkf.sh#L40
+readlinkf_readlink() {
+  [ "${1:-}" ] || return 1
+  max_symlinks=40
+  CDPATH='' # to avoid changing to an unexpected directory
+
+  target=$1
+  [ -e "${target%/}" ] || target=${1%"${1##*[!/]}"} # trim trailing slashes
+  [ -d "${target:-/}" ] && target="$target/"
+
+  cd -P . 2>/dev/null || return 1
+  while [ "$max_symlinks" -ge 0 ] && max_symlinks=$((max_symlinks - 1)); do
+    if [ ! "$target" = "${target%/*}" ]; then
+      case $target in
+        /*) cd -P "${target%/*}/" 2>/dev/null || break ;;
+        *) cd -P "./${target%/*}" 2>/dev/null || break ;;
+      esac
+      target=${target##*/}
+    fi
+
+    if [ ! -L "$target" ]; then
+      target="${PWD%/}${target:+/}${target}"
+      printf '%s\n' "${target:-/}"
+      return 0
+    fi
+
+    target=$(readlink -- "$target" 2>/dev/null) || break
+  done
+  return 1
+}
+
+
+if [ "${RCRC}" = "${HOME}/.rcrc" ]; then
+  rcrc_link_path=$(readlinkf_readlink "${RCRC}")
+  rcrc_dir=$(dirname -- "${rcrc_link_path}")
+else
+  rcrc_dir=$(dirname -- "{$RCRC")
+fi
+
+dotfiles_base_dir="${rcrc_dir}/.."
+
+# Get OS info from uname in ALL CAPS
+uname="$(uname -s | tr '[:lower:]' '[:upper:]')"
+
+if [ "${uname}" = 'DARWIN' ]; then
+  os_type='bsd'
+  os_name='darwin'
+  os_version="$(sw_vers -productVersion | sed -E 's/([0-9]+\.[0-9]+).*/\1/')"
+  os_name_version="${os_name}${os_version}"
+elif [ "${uname}" = 'FREEBSD' ]; then
+  os_type='bsd'
+  os_name='freebsd'
+elif [ "$uname" = 'LINUX' ]; then
+  os_type='linux'
+  if [ -s '/etc/os-release' ]; then
+    os_name="$(grep '^ID=' /etc/os-release | sed -e 's/.*="\?\([^"]*\)"\?/\1/' | tr '[:upper:]' '[:lower:]')"
+    os_version="$(grep '^VERSION_ID=' /etc/os-release | sed -e 's/.*="\?\([^"]*\)"\?/\1/' | tr '[:upper:]' '[:lower:]')"
+    os_name_version="${os_name}${os_version}"
+  fi
+fi
+
+
+if [ -n "${SHELL}" ]; then
+  shell_name=$(basename "${SHELL}")
+fi
+
+
+DOTFILES_DIRS="${dotfiles_base_dir}/conditional-dotfiles ${dotfiles_base_dir}/dotfiles"
+TAGS="${os_name_version} ${os_name} ${os_type} ${shell_name}"
+UNDOTTED="bin Library"
+
+echo "TAGS=${TAGS}"
+
