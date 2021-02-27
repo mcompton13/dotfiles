@@ -49,6 +49,9 @@ fi
 
 alias tree='smartpage 1 tree -C'
 
+alias rg='smartpage 1 rg --color=always'
+alias exa='COLUMNS=$COLUMNS smartpage 1 exa --color=always'
+
 # Some shortcuts for different directory listings
 alias la='ls -A'   # all but . and ..
 alias ll='ls -Al'  # all with long detailed list
@@ -57,4 +60,7 @@ alias pp_json='python -m json.tool'
 alias pp_xml='xmllint --format -'
 
 alias randchars='head -c 10000 /dev/urandom | LC_CTYPE=C tr -dc 'a-z1-9' | cut -c1-'
+
+#TODO Move to darwin aliases
+#alias trash="osascript -e 'tell application "Finder" to delete the POSIX file "/Users/mcompton/blah"'"
 
