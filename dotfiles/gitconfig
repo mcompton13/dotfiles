@@ -3,9 +3,12 @@
 [color]
 	ui = auto
 [color "branch"]
-	current = green
-    local = yellow
+    local = cyan
+	current = magenta
     remote = red
+[color "decorate"]
+    branch = magenta
+    remoteBranch = red
 [color "status"]
 	added = green
     changed = yellow
@@ -28,3 +31,6 @@
 # Include settings for this particular computer
 [include]
     path = ~/.gitconfig-local
+
+[alias]
+	root = rev-parse --show-toplevel
