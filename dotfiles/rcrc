@@ -1,4 +1,9 @@
-#!/usr/bin/env sh
+#!/bin/sh
+
+#handle_common_flags "foo" 0 2
+
+# Helper functions
+###################
 
 # This function is copied from
 # https://github.com/ko1nksm/readlinkf/blob/a1112ce3ff6be50da8f45abe6667e0e4be7d9bb8/readlinkf.sh#L40
@@ -32,25 +37,53 @@ readlinkf_readlink() {
   return 1
 }
 
+# Helper functions to determin which commands and apps are available
 
-if [ "${RCRC}" = "${HOME}/.rcrc" ]; then
-  rcrc_link_path=$(readlinkf_readlink "${RCRC}")
-  rcrc_dir=$(dirname -- "${rcrc_link_path}")
-else
-  rcrc_dir=$(dirname -- "{$RCRC")
+script_succeeds(){
+  $VERBOSE "Check if '$1' exists and returns success..."
+  [ -s "$1" ] && source "$1"
+}
+
+cmd_is_found(){
+  $VERBOSE "Check if command '$1' is found..."
+  [ -x "$(command -v "$1" 2>/dev/null)" ]
+}
+
+app_is_found() { return 1; }
+
+if cmd_is_found mdfind; then
+  # Checks if input is a bundle identifier of an installed MacOS app
+  $VERBOSE "...Found mdfind command"
+  app_is_found() {
+    $VERBOSE "Check if app '$1' is found..."
+    [ $(mdfind -count "kMDItemCFBundleIdentifier == '$1'" 2>/dev/null) -ne 0 ]
+  }
 fi
 
-dotfiles_base_dir="${rcrc_dir}/.."
+# Figure out what gets installed
+#################################
+
+IS_FOUND_SH_NAME=is_found.sh
+
+actual_rcrc_file="$RCRC"
+
+if [ "$RCRC" = "$HOME/.rcrc" ]; then
+  actual_rcrc_file=$(readlinkf_readlink "$RCRC")
+fi
+
+rcrc_dir=$(dirname -- "$actual_rcrc_file")
+
+dotfiles_base_dir="$(cd -- "$rcrc_dir/.." && echo "$PWD")"
 
 # Get OS info from uname in ALL CAPS
 uname="$(uname -s | tr '[:lower:]' '[:upper:]')"
 
-if [ "${uname}" = 'DARWIN' ]; then
+if [ "$uname" = 'DARWIN' ]; then
   os_type='bsd'
-  os_name='darwin'
+  os_name='macos'
   os_version="$(sw_vers -productVersion | sed -E 's/([0-9]+\.[0-9]+).*/\1/')"
-  os_name_version="${os_name}${os_version}"
-elif [ "${uname}" = 'FREEBSD' ]; then
+  os_name_version="$os_name$os_version"
+elif [ "$uname" = 'FREEBSD' ]; then
   os_type='bsd'
   os_name='freebsd'
 elif [ "$uname" = 'LINUX' ]; then
@@ -58,19 +91,27 @@ elif [ "$uname" = 'LINUX' ]; then
   if [ -s '/etc/os-release' ]; then
     os_name="$(grep '^ID=' /etc/os-release | sed -e 's/.*="\?\([^"]*\)"\?/\1/' | tr '[:upper:]' '[:lower:]')"
     os_version="$(grep '^VERSION_ID=' /etc/os-release | sed -e 's/.*="\?\([^"]*\)"\?/\1/' | tr '[:upper:]' '[:lower:]')"
-    os_name_version="${os_name}${os_version}"
+    os_name_version="$os_name$os_version"
   fi
 fi
 
+for dir in $dotfiles_base_dir/*; do
+  name=$(basename -- "$dir")
+  { [ -d "$dir" ] && [ ! "common" = "$name" ]; } || continue
 
-if [ -n "${SHELL}" ]; then
-  shell_name=$(basename "${SHELL}")
-fi
+  $DEBUG "Checking $name ($dir) is found..."
 
+  if cmd_is_found "$name" || app_is_found "$name" || script_succeeds "$dir/$IS_FOUND_SH_NAME" ; then
+    app_cmd_dotfiles_dirs="$app_cmd_dotfiles_dirs $dir"
+    $DEBUG "...Found $name (app_cmd_dotfiles_dirs=$app_cmd_dotfiles_dirs)"
+  fi
+done;
 
-DOTFILES_DIRS="${dotfiles_base_dir}/conditional-dotfiles ${dotfiles_base_dir}/dotfiles"
-TAGS="${os_name_version} ${os_name} ${os_type} ${shell_name}"
+# Set the RCM variables to setup the install
+#############################################
+
+DOTFILES_DIRS="$app_cmd_dotfiles_dirs $dotfiles_base_dir/common"
+TAGS="$os_name_version $os_name $os_type"
 UNDOTTED="bin Library"
-
-echo "TAGS=${TAGS}"
+EXCLUDES="*.md $IS_FOUND_SH_NAME"
 
