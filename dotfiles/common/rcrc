@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Uncomment to enable debug messages
 #handle_common_flags "foo" 0 2
 
 # Helper functions
