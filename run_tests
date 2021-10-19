@@ -8,11 +8,11 @@ RUN_TEST_SCRIPT_ARGS="$*"
 WORKING_DIR=$(pwd)
 
 main() {
-  repo_root="$_REPO_ROOT_DIR_"
+  repo_root="${_REPO_ROOT_DIR_:-}"
 
   exit_if_invalid_repo_root "$repo_root"
 
-  out_bin_dir="$_OUT_DIR_/bin"
+  out_bin_dir="${_OUT_DIR_:-}/bin"
 
   if [ ! -x "$out_bin_dir/$SHUNIT2_TEST_RUNNER_SCRIPT_NAME" ]; then
     download_shunit2_scripts "$out_bin_dir"
@@ -44,26 +44,21 @@ download_shunit2_scripts() {
 }
 
 run_tests() {(
-  shunit2_bin_dir=$1
+  shunit2_bin_dir="$1"
+  safe_cd "$_REPO_ROOT_DIR_/test"
 
-  source_shunit2_runner "$shunit2_bin_dir"
+  source_test_runner "$shunit2_bin_dir"
 
-  _test_suffix='_test.sh'
   _lib_dir="$shunit2_bin_dir/lib"
-
-  # Used by main() function from shunit2 runner script to find test scripts
-  _runner_tests() { echo "./test/*$_test_suffix" | sed 's#\./##g'; }
-
   # NOTE: Setting tests='' to avoid unbound variable error in main caused by using set -e
   LIB_DIR=$_lib_dir tests='' main "$RUN_TEST_SCRIPT_ARGS"
 )}
 
-source_shunit2_runner() {
+source_test_runner() {
   # Arg $1 - the dir where the shunit2 scripts are
 
   # Pull in the shunit2 test_runner, but set SHUNIT_VERSION so it doesn't run yet
-  # shellcheck source=out/bin/test_runner
-  SHUNIT_VERSION="DoNotRun" . "$1/$SHUNIT2_TEST_RUNNER_SCRIPT_NAME"
+  SHUNIT_VERSION="DoNotRun" . "$1/test_runner"
 }
 
 script_main_should_run && main

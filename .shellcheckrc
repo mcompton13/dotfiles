@@ -1,0 +1,18 @@
+#source-path=SCRIPTDIR
+#source-path=SCRIPTDIR/lib
+#source-path=SCRIPTDIR/test
+#source-path=SCRIPTDIR/out/bin
+#source-path=SCRIPTDIR/out/bin/lib
+#source-path=SCRIPTDIR/../lib
+#source-path=SCRIPTDIR/../out/bin
+#source-path=SCRIPTDIR/../out/bin/lib
+
+# Allow opening any 'source'd file, even if not specified as input
+#external-sources=true
+
+enable=all
+
+# https://github.com/koalaman/shellcheck/wiki/SC1090 - Can't follow non-constant source.
+# https://github.com/koalaman/shellcheck/wiki/SC1091 - Can't access the source file.
+# https://github.com/koalaman/shellcheck/wiki/SC2250 - Prefer putting braces around variable references
+disable=SC1090,SC1091,SC2250

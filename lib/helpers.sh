@@ -1,7 +1,12 @@
-#!/bin/sh
+# shellcheck shell=sh
 
 HELPERS_TRUE=0
+# These variables are used in scripts that source this helper file
+# shellcheck disable=SC2034  # https://github.com/koalaman/shellcheck/wiki/SC2034
 HELPERS_FALSE=1
+# shellcheck disable=SC2034
+HELPERS_SUCCESS=$HELPERS_TRUE
+# shellcheck disable=SC2034
 HELPERS_ERROR=2
 
 script_main_should_run() {

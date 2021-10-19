@@ -6,15 +6,15 @@
 import_repo_script lib/helpers.sh
 
 test_HELPERS_TRUE_equals_true() {
-  assertTrue "$HELPERS_TRUE"
+  assertTrue "${HELPERS_TRUE:-}"
 }
 
 test_HELPERS_FALSE_equals_false() {
-  assertFalse "$HELPERS_FALSE"
+  assertFalse "${HELPERS_FALSE:-}"
 }
 
 test_HELPERS_ERROR_equals_two() {
-  assertEquals 2 "$HELPERS_ERROR"
+  assertEquals 2 "${HELPERS_ERROR-}"
 }
 
 test_script_main_should_run_returns_true_when_unit_tests_NOT_running() {

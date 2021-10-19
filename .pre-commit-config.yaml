@@ -1,0 +1,10 @@
+repos:
+  - repo: local
+    hooks:
+    - id: shellcheck
+      name: ShellCheck
+      language: script
+      entry: ./test/run_shellcheck_test.sh
+      args: ["--shellcheck-files"]
+      types: [ text ]
+      exclude_types: [ yaml, plist ]
