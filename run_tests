@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${0%/*}/test/helpers.sh"
+. "${0%/*}/test/lib/test_helpers.sh"
 
 SHUNIT2_VERSION=2.1.8
 SHUNIT2_TEST_RUNNER_SCRIPT_NAME='test_runner'
@@ -56,9 +56,16 @@ run_tests() {(
 
 source_test_runner() {
   # Arg $1 - the dir where the shunit2 scripts are
+  _orig_shunit_version="${SHUNIT_VERSION:-}"
 
   # Pull in the shunit2 test_runner, but set SHUNIT_VERSION so it doesn't run yet
   SHUNIT_VERSION="DoNotRun" . "$1/test_runner"
+
+  if [ -n "$_orig_shunit_version" ]; then
+    SHUNIT_VERSION="$_orig_shunit_version"
+  else
+    unset SHUNIT_VERSION
+  fi
 }
 
 script_main_should_run && main
