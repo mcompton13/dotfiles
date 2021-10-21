@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${0%/*}/helpers.sh"
+. "${0%/*}/lib/test_helpers.sh"
 
 test_echo_return_value_prints_false_value_for_failure_functions() {
   assertFalse "$(echo_return_value false)"
@@ -13,7 +13,7 @@ test_echo_return_value_prints_true_value_for_successful_functions() {
 test_echo_return_value_prints_error_code_for_failure_functions() {
   _error_code=47
   _test_function() { return "$1"; }
-  assertEquals $_error_code "$(echo_return_value _test_function $_error_code)"
+  assertEquals "$_error_code" "$(echo_return_value _test_function "$_error_code")"
 }
 
 test_remove_start_chars_removes_three_chars_from_start_of_string() {
@@ -117,9 +117,9 @@ test_repeat_chars_returns_error_if_second_arg_is_string() {
 _test_repeat_chars_returns_error_with_args() {
   if [ $# -eq 0 ]; then
     _test_command_returns_error_with_args repeat_chars
-    return
+  else
+    _test_command_returns_error_with_args repeat_chars "$@"
   fi
-  _test_command_returns_error_with_args repeat_chars "$@"
 }
 
 _test_command_returns_error_with_args() {

@@ -32,23 +32,29 @@ current_shell_is_ksh() {
   [ -n "${KSH_VERSION:-}" ]
 }
 
-current_shell_is_sh() {
+current_shell_is_sh() {(
   # Check for bash and zsh acting as /bin/sh
-  current_shell_is_bash && [ "${BASH:-}" = "/bin/sh" ] && return "${HELPERS_TRUE:-}"
-  current_shell_is_zsh && [ "${ZSH_NAME:-}" = "sh" ] && return "${HELPERS_TRUE:-}"
+  current_shell_is_bash && is_sh_shell "${BASH:-}" && return "${HELPERS_TRUE:-}"
+  current_shell_is_zsh && is_sh_shell "${ZSH_NAME:-}" && return "${HELPERS_TRUE:-}"
 
-  (current_shell_is_bash || current_shell_is_ksh || current_shell_is_zsh) \
+  { current_shell_is_bash || current_shell_is_ksh || current_shell_is_zsh; } \
       && return "${HELPERS_FALSE:-}"
 
-  [ "$(get_current_shell_command)" = "/bin/sh" ] && return "${HELPERS_TRUE:-}"
+  is_sh_shell "$(get_current_shell_command)" && return "${HELPERS_TRUE:-}"
 
   return "${HELPERS_FALSE:-}"
+)}
+
+is_sh_shell() {
+  [ "$1" = "/bin/sh" ] || [ "$1" = "sh" ]
 }
 
-get_current_shell_command() {
-  foo="$(ps -p $$ -o comm)"
-  echo "${foo#COMM?}"
-}
+get_current_shell_command() {(
+  _current_command="$(ps -p $$ -o comm)"
+
+  _current_command="${_current_command#COMMAND?}"
+  echo "${_current_command#COMM?}"
+)}
 
 import_repo_script() {
   # This is used to source lots of different scripts, shellcheck won't be able to figure it out
@@ -61,7 +67,7 @@ echo_return_value() {(
   echo "$?"
 )}
 
-assertStartsWith() {(
+assertStartsWith() {
   _description=$1
   shift
   _expect=$1
@@ -71,7 +77,7 @@ assertStartsWith() {(
   _result=$(remove_end_chars "$1" "$_num_to_remove_from_end")
   shift
   assertEquals "$_description" "$_expect" "$_result" "$@"
-)}
+}
 
 remove_start_chars() {(
   _str=$1

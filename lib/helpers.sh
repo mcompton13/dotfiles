@@ -16,5 +16,5 @@ script_main_should_run() {
 
 safe_cd() {
   #dir=$1
-  cd "$1" >/dev/null || (echo "'cd $1' failed" >&2; exit 1)
+  cd "$1" >/dev/null || { echo "'cd $1' failed" >&2; exit "${HELPERS_ERROR}"; }
 }

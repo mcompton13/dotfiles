@@ -1,6 +1,6 @@
 #!/bin/sh
 
-. "${0%/*}/helpers.sh"
+. "${0%/*}/lib/test_helpers.sh"
 
 # Pull in script to test
 import_repo_script lib/helpers.sh
