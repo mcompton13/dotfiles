@@ -2,6 +2,161 @@
 
 . "${0%/*}/lib/test_helpers.sh"
 
+test_current_shell_is_bash_returns_false_when_BASH_VERSION_missing() {
+  assertFalse "$(BASH_VERSION='' echo_return_value current_shell_is_bash)"
+  assertFalse "$(unset BASH_VERSION
+    echo_return_value current_shell_is_bash)"
+}
+
+test_current_shell_is_bash_returns_true_when_BASH_VERSION_is_set() {
+  assertTrue "$(BASH_VERSION='SomeValue' echo_return_value current_shell_is_bash)"
+}
+
+test_current_shell_is_ksh_returns_false_when_KSH_VERSION_missing() {
+  assertFalse "$(KSH_VERSION='' echo_return_value current_shell_is_ksh)"
+  assertFalse "$(unset KSH_VERSION
+    echo_return_value current_shell_is_ksh)"
+}
+
+test_current_shell_is_ksh_returns_true_when_KSH_VERSION_is_set() {
+  assertTrue "$(KSH_VERSION='SomeValue' echo_return_value current_shell_is_ksh)"
+}
+
+test_current_shell_is_zsh_returns_false_when_ZSH_VERSION_missing() {
+  assertFalse "$(ZSH_VERSION='' echo_return_value current_shell_is_zsh)"
+  assertFalse "$(unset ZSH_VERSION
+    echo_return_value current_shell_is_zsh)"
+}
+
+test_current_shell_is_zsh_returns_true_when_ZSH_VERSION_is_set() {
+  assertTrue "$(ZSH_VERSION='SomeValue' echo_return_value current_shell_is_zsh)"
+}
+
+test_current_shell_is_sh_returns_false_when_current_shell_is_bash() {
+  assertFalse "Bash running in bash mode should not be detected as POSIX sh" "$(
+    unset ZSH_VERSION
+    unset KSH_VERSION
+    BASH_VERSION='SomeValue'
+    BASH='bash'
+    echo_return_value current_shell_is_sh
+  )"
+  assertFalse "Bash running in bash mode should not be detected as POSIX sh" "$(
+    unset ZSH_VERSION
+    unset KSH_VERSION
+    BASH_VERSION='SomeValue'
+    unset BASH
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+test_current_shell_is_sh_returns_false_when_current_shell_is_ksh() {
+  assertFalse "KSH running in ksh mode should not be detected as POSIX sh" "$(
+    unset BASH_VERSION
+    unset ZSH_VERSION
+    # shellcheck disable=SC2034 # Not unused, current_shell_is_sh checks it
+    KSH_VERSION='SomeValue'
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+test_current_shell_is_sh_returns_false_when_current_shell_is_zsh() {
+  assertFalse "ZSH running in zsh mode should not be detected as POSIX sh" "$(
+    unset BASH_VERSION
+    unset KSH_VERSION
+    ZSH_VERSION='SomeValue'
+    # shellcheck disable=SC2034 # Not unused, current_shell_is_sh checks it
+    ZSH_NAME='zsh'
+    echo_return_value current_shell_is_sh
+  )"
+  assertFalse "ZSH running in zsh mode should not be detected as POSIX sh" "$(
+    unset BASH_VERSION
+    unset KSH_VERSION
+    # shellcheck disable=SC2034 # Not unused, current_shell_is_sh checks it
+    ZSH_VERSION='SomeValue'
+    unset ZSH_NAME
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+test_current_shell_is_sh_returns_true_when_current_shell_is_bash_in_sh_mode() {
+  assertTrue "Bash running in sh mode should be detected as POSIX sh" "$(
+    unset ZSH_VERSION
+    unset KSH_VERSION
+    BASH_VERSION='SomeValue'
+    BASH='/bin/sh'
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+test_current_shell_is_sh_returns_true_when_current_shell_is_zsh_in_sh_mode() {
+  assertTrue "ZSH running in sh mode should be detected as POSIX sh" "$(
+    unset BASH_VERSION
+    unset KSH_VERSION
+    # shellcheck disable=SC2034 # Not unused, current_shell_is_sh checks it
+    ZSH_VERSION='SomeValue'
+    # shellcheck disable=SC2034 # Not unused, current_shell_is_sh checks it
+    ZSH_NAME='sh'
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+test_current_shell_is_sh_returns_true_when_current_shell_is_unknown_but_command_is_sh() {
+  # Test with the COMMAND ps heading
+  assertTrue "Unknown shell with command /bin/sh should be detected as POSIX sh" "$(
+    ps() {
+      PS_HEADING='COMMAND' mock_ps
+    }
+    set_unknown_shell
+    echo_return_value current_shell_is_sh
+  )"
+
+  # Test with the command return by ps being just sh instead of /bin/sh
+  assertTrue "Unknown shell with command sh should be detected as POSIX sh" "$(
+    ps() {
+      PS_COMMAND='sh' mock_ps
+    }
+    set_unknown_shell
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+test_current_shell_is_sh_returns_false_when_current_shell_is_unknown_and_command_is_not_sh() {
+  # Test with the command return by ps being rsh instead of /bin/sh
+  assertFalse "Unknown shell with command rsh should NOT be detected as POSIX sh" "$(
+    ps() {
+      PS_COMMAND='rsh' mock_ps
+    }
+    set_unknown_shell
+    echo_return_value current_shell_is_sh
+  )"
+
+  # Test with the command return by ps being /foo/sh instead of /bin/sh
+  assertFalse "Unknown shell with command /foo/sh should NOT be detected as POSIX sh" "$(
+    ps() {
+      PS_COMMAND='/foo/sh' mock_ps
+    }
+    set_unknown_shell
+    echo_return_value current_shell_is_sh
+  )"
+}
+
+set_unknown_shell() {
+  unset ZSH_VERSION
+  unset BASH_VERSION
+  unset KSH_VERSION
+}
+
+mock_ps() {(
+  : "${PS_HEADING:=COMM}"
+  : "${PS_COMMAND:=/bin/sh}"
+
+  cat << EOF
+${PS_HEADING}
+${PS_COMMAND}
+EOF
+)}
+
+
 test_echo_return_value_prints_false_value_for_failure_functions() {
   assertFalse "$(echo_return_value false)"
 }

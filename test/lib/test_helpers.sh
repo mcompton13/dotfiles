@@ -24,29 +24,29 @@ current_shell_is_bash() {
   [ -n "${BASH_VERSION:-}" ]
 }
 
-current_shell_is_zsh() {
-  [ -n "${ZSH_VERSION:-}" ]
-}
-
 current_shell_is_ksh() {
   [ -n "${KSH_VERSION:-}" ]
 }
 
-current_shell_is_sh() {(
+current_shell_is_zsh() {
+  [ -n "${ZSH_VERSION:-}" ]
+}
+
+current_shell_is_sh() {
   # Check for bash and zsh acting as /bin/sh
-  current_shell_is_bash && is_sh_shell "${BASH:-}" && return "${HELPERS_TRUE:-}"
-  current_shell_is_zsh && is_sh_shell "${ZSH_NAME:-}" && return "${HELPERS_TRUE:-}"
+  current_shell_is_bash && is_sh_command "${BASH:-}" && return "${HELPERS_TRUE:-}"
+  current_shell_is_zsh && is_sh_command "${ZSH_NAME:-}" && return "${HELPERS_TRUE:-}"
 
   { current_shell_is_bash || current_shell_is_ksh || current_shell_is_zsh; } \
       && return "${HELPERS_FALSE:-}"
 
-  is_sh_shell "$(get_current_shell_command)" && return "${HELPERS_TRUE:-}"
+  is_sh_command "$(get_current_shell_command)" && return "${HELPERS_TRUE:-}"
 
   return "${HELPERS_FALSE:-}"
-)}
+}
 
-is_sh_shell() {
-  [ "$1" = "/bin/sh" ] || [ "$1" = "sh" ]
+is_sh_command() {
+  [ "$1" = '/bin/sh' ] || [ "$1" = 'sh' ]
 }
 
 get_current_shell_command() {(
