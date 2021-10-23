@@ -1,8 +1,9 @@
 # shellcheck shell=sh
 
 get_modified_files_from_git() {
-  # filter 'dx' means exclude deleted and unknown files
-  git diff --name-only --diff-filter=dx HEAD
+  # Returning file names Added (A), Copied (C), Modified (M), Renamed (R), are Unmerged (U), or
+  # have had their pairing Broken (B)
+  git diff --name-only --diff-filter=ACMRUB HEAD
 }
 
 get_valid_files_to_shellcheck() {(
