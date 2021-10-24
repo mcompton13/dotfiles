@@ -14,7 +14,11 @@ script_main_should_run() {
   [ -z "${SHUNIT_VERSION:-}" ]
 }
 
+script_should_import_only() {
+  ! script_main_should_run
+}
+
 safe_cd() {
   #dir=$1
-  cd "$1" >/dev/null || { echo "'cd $1' failed" >&2; exit "${HELPERS_ERROR}"; }
+  cd "$1" >/dev/null || { echo "'cd $1' failed, exiting." >&2; exit "${HELPERS_ERROR}"; }
 }

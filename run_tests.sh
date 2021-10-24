@@ -68,4 +68,4 @@ source_test_runner() {
   fi
 }
 
-script_main_should_run && main
+script_should_import_only || main
