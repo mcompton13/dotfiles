@@ -6,19 +6,19 @@ set -u
 # Set shwordsplit for zsh.
 [ -n "${ZSH_VERSION:-}" ] && setopt shwordsplit
 
+#FIXME: Remove
 _get_repo_root() {
   git rev-parse --show-toplevel
 }
 
-_REPO_ROOT_DIR_=$(_get_repo_root)
-_LIB_DIR_="$_REPO_ROOT_DIR_/lib"
-_OUT_DIR_="$_REPO_ROOT_DIR_/out"
+#FIXME: Temporary
+: "${REPO_ROOT:=$(_get_repo_root)}"
 
 if [ ! -x "$(command -v shunit2)" ]; then
-  PATH="$PATH:$_OUT_DIR_/bin"
+  PATH="$PATH:${REPO_ROOT:-}/out/bin"
 fi
 
-. "$_LIB_DIR_/helpers.sh"
+. "${REPO_ROOT:-}/lib/helpers.sh"
 
 current_shell_is_bash() {
   [ -n "${BASH_VERSION:-}" ]
@@ -56,10 +56,11 @@ get_current_shell_command() {(
   echo "${_current_command#COMM?}"
 )}
 
+# FIXME: Remove this
 import_repo_script() {
   # This is used to source lots of different scripts, shellcheck won't be able to figure it out
   # shellcheck disable=SC1090
-  . "$_REPO_ROOT_DIR_/$*"
+  . "${REPO_ROOT:-}/$*"
 }
 
 echo_return_value() {(

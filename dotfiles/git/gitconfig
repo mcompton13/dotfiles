@@ -1,5 +1,14 @@
 # These are git settings that apply to all systems, if you have specific settings for a machine (like setting a work
 # name and email address you should modify the included ~/.gitconfig-local instead.
+
+# Check out https://www.atlassian.com/blog/git/advanced-git-aliases
+
+# Also setup gitattributes: https://www.git-scm.com/docs/gitattributes
+#   https://github.com/jumanjihouse/devenv/blob/master/.gitattributes
+#   https://www.urbanautomaton.com/blog/2011/07/28/git-grep-and-language-specific-diffs/
+#   https://www.atlassian.com/blog/git/advanced-git-aliases
+
+
 [color]
 	ui = auto
 [color "branch"]
@@ -21,7 +30,7 @@
 	precomposeunicode = true
 [difftool "sourcetree"]
 	cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
-	path = 
+	path =
 [mergetool "sourcetree"]
 	cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
 	trustExitCode = true

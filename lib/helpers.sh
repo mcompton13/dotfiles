@@ -18,7 +18,26 @@ script_should_import_only() {
   ! script_main_should_run
 }
 
+exit_if_invalid_repo_root() {
+  repo_dir_to_test="$1"
+  echo "Checking repo root $repo_dir_to_test" >&2
+
+  if [ -z "$repo_dir_to_test" ] || [ ! -d "$repo_dir_to_test" ]; then
+    echo "Failed to find repo root" >&2
+    exit 1
+  fi
+}
+
+# TODO: Move to bootstrap script
 safe_cd() {
   #dir=$1
   cd "$1" >/dev/null || { echo "'cd $1' failed, exiting." >&2; exit "${HELPERS_ERROR}"; }
 }
+
+is_set_e_enabled() { (
+  set_e_state=$( (
+    false
+    echo 'disabled'
+  ) | cat)
+  [ "${set_e_state}" != 'disabled' ]
+) }
