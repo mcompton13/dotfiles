@@ -10,36 +10,36 @@
 
 
 [color]
-	ui = auto
+  ui = auto
 [color "branch"]
-    local = cyan
-	current = magenta
-    remote = red
+  local = cyan
+  current = magenta
+  remote = red
 [color "decorate"]
-    branch = magenta
-    remoteBranch = red
+  branch = magenta
+  remoteBranch = red
 [color "status"]
-	added = green
-    changed = yellow
-    untracked = red
+  added = green
+  changed = yellow
+  untracked = red
 [user]
-	name = Matthew Compton
-	email = comptonma@gmail.com
+  name = Matthew Compton
+  email = comptonma@gmail.com
 [core]
-	excludesfile = ~/.gitignore_global
-	precomposeunicode = true
+  excludesfile = ~/.gitignore_global
+  precomposeunicode = true
 [difftool "sourcetree"]
-	cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
-	path =
+  cmd = /usr/local/bin/ksdiff -w \"$LOCAL\" \"$REMOTE\"
+  path =
 [mergetool "sourcetree"]
-	cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
-	trustExitCode = true
+  cmd = /usr/local/bin/ksdiff --merge --output \"$MERGED\" --base \"$BASE\" -- \"$LOCAL\" --snapshot \"$REMOTE\" --snapshot
+  trustExitCode = true
 [bash]
-    showDirtyState = true
-    showUntrackedFiles = true
+  showDirtyState = true
+  showUntrackedFiles = true
 # Include settings for this particular computer
 [include]
-    path = ~/.gitconfig-local
+  path = ~/.gitconfig-local
 
 [alias]
-	root = rev-parse --show-toplevel
+  root = rev-parse --show-toplevel
